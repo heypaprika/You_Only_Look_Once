@@ -4,3 +4,7 @@
 *-checkpoint.ipynb
 script/
 .vscode/launch.json
+venv/
+.idea/
+.ipynb_checkpoints/
+*.ipynb
