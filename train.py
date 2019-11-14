@@ -85,10 +85,7 @@ def train(args):
     # model
     
     model = models.YOLOv1(
-        params = {
-            "dropout" : dropout,
-            "num_class" : num_class
-        }
+        num_class, dropout
     )
     
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -143,9 +140,9 @@ def train(args):
             if total_step % 100 == 0:
                 print(
                     "epoch: [{}/{}], step:{}, lr:{}, total_loss:{:.4f}, \
-                    coord:{:.4f}, size:{:.4f}, objness:{:.4f}, noobjness:{:.4f}, class:{:.4f}".format(
+                    \ncoord:{:.4f}, size:{:.4f}, objness:{:.4f}, noobjness:{:.4f}, class:{:.4f}".format(
                         epoch, num_epochs, total_step, 
-                        ([param['lr'] for param in optimizer.param_group])[0], 
+                        ([param['lr'] for param in optimizer.param_groups])[0],
                         loss.item(), coord_loss, size_loss, objness_loss, noobjness_loss, class_loss
                     ))
             

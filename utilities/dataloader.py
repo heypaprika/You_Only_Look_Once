@@ -125,8 +125,8 @@ def detection_collate(batch):
             h_ratio = object[4]
 
             scale_factor = 1 / 7
-            grid_x_index = x_ratio // scale_factor
-            grid_y_index = y_ratio // scale_factor
+            grid_x_index = int(x_ratio // scale_factor)
+            grid_y_index = int(y_ratio // scale_factor)
             x_offset = x_ratio / scale_factor - grid_x_index
             y_offset = y_ratio / scale_factor - grid_y_index
 

@@ -14,10 +14,10 @@ import matplotlib.pyplot as plt
 
 
 class YOLOv1(nn.Module):
-    def __init__(self, args):
+    def __init__(self, num_class, dropout):
         super(YOLOv1, self).__init__()
-        self.dropout = args.dropout
-        self.num_classes = args.num_class
+        self.dropout = dropout
+        self.num_classes = num_class
         self.momentum = 0.01
         self.Pool = nn.MaxPool2d(kernel_size=2, stride=2)
         # layer1
@@ -106,39 +106,39 @@ class YOLOv1(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
         self.feature = nn.Sequential(
-            self.Conv_7x7_3_64_s2(),
-            self.Pool(),
-            self.Conv_3x3_64_192(),
-            self.Pool(),
-            self.Conv_1x1_192_128(),
-            self.Conv_3x3_128_256(),
-            self.Conv_1x1_256_256(),
-            self.Conv_3x3_256_512(),
-            self.Pool(),
-            self.Conv_1x1_512_256(),
-            self.Conv_3x3_256_512(),
-            self.Conv_1x1_512_256(),
-            self.Conv_3x3_256_512(),
-            self.Conv_1x1_512_256(),
-            self.Conv_3x3_256_512(),
-            self.Conv_1x1_512_256(),
-            self.Conv_3x3_256_512(),
-            self.Conv_1x1_512_512(),
-            self.Conv_3x3_512_1024(),
-            self.Pool(),
-            self.Conv_1x1_1024_512(),
-            self.Conv_3x3_512_1024(),
-            self.Conv_1x1_1024_512(),
-            self.Conv_3x3_512_1024(),
-            self.Conv_3x3_1024_1024(),
-            self.Conv_3x3_1024_1024_s2(),
-            self.Conv_3x3_1024_1024(),
-            self.Conv_3x3_1024_1024()
+            self.Conv_7x7_3_64_s2,
+            self.Pool,
+            self.Conv_3x3_64_192,
+            self.Pool,
+            self.Conv_1x1_192_128,
+            self.Conv_3x3_128_256,
+            self.Conv_1x1_256_256,
+            self.Conv_3x3_256_512,
+            self.Pool,
+            self.Conv_1x1_512_256,
+            self.Conv_3x3_256_512,
+            self.Conv_1x1_512_256,
+            self.Conv_3x3_256_512,
+            self.Conv_1x1_512_256,
+            self.Conv_3x3_256_512,
+            self.Conv_1x1_512_256,
+            self.Conv_3x3_256_512,
+            self.Conv_1x1_512_512,
+            self.Conv_3x3_512_1024,
+            self.Pool,
+            self.Conv_1x1_1024_512,
+            self.Conv_3x3_512_1024,
+            self.Conv_1x1_1024_512,
+            self.Conv_3x3_512_1024,
+            self.Conv_3x3_1024_1024,
+            self.Conv_3x3_1024_1024_s2,
+            self.Conv_3x3_1024_1024,
+            self.Conv_3x3_1024_1024
         )
 
         self.FC = nn.Sequential(
-            self.fc1(),
-            self.fc2()
+            self.fc1,
+            self.fc2
         )
 
     def forward(self, x):
@@ -169,7 +169,7 @@ def detection_loss_4_yolo(pred, target, l_coord, l_noobj, device):
     y_offset_label = target[:,:,:,2]
     w_ratio_label = target[:,:,:,3]
     h_ratio_label = target[:,:,:,4]
-    class_label = one_hot(class_pred, target[:,:,:,5], device)
+    class_label = one_hot(class_pred, target[:,:,:,5:], device)
 
     noobjness_label = torch.neg(torch.add(objness_label, -1))
 

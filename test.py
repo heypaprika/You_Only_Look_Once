@@ -2,7 +2,7 @@
 
 import os
 import torch
-import yolov1
+import models
 import matplotlib.pyplot as plt
 import numpy as np
 

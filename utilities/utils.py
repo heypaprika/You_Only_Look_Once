@@ -21,7 +21,8 @@ def one_hot(output, label, device):
     for k in range(b):
         for i in range(s1):
             for j in range(s2):
-
+                # if label[k][i][j] > 0:
+                    # print(label[k][i][j])
                 dst[k][i][j][int(label[k][i][j])] = 1.
 
     result = torch.from_numpy(dst)

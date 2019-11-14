@@ -10,8 +10,8 @@ parser.add_argument('--mode', type=str, help='train test', default='train')
 
 # Data
 parser.add_argument('--dataset', type=str, default='voc')
-parser.add_argument('--data_path', type=str, required=True)
-parser.add_argument('--class_path', type=str, required=True)
+parser.add_argument('--data_path', type=str, default='/home/yangho/dev/dataset/VOCdevkit/VOC2007')
+parser.add_argument('--class_path', type=str, default='./names/voc.names')
 parser.add_argument('--checkpoint_path', type=str, default='./')
 
 # Input
@@ -32,10 +32,10 @@ parser.add_argument('--num_gpus', type=int, default=1)
 parser.add_argument('--use_augmentation', type=lambda x: (str(x).lower() == 'true'), default=True)
 parser.add_argument('--use_visdom', type=lambda x:(str(x).lower() == 'true'), default=False)
 parser.add_argument('--use_wandb', type=lambda x: (str(x).lower() == 'true'), default=False)
-parser.add_argument('--user_summary', type=lambda x: (str(x).lower() == 'true'), default=False)
+parser.add_argument('--use_summary', type=lambda x: (str(x).lower() == 'true'), default=False)
 
 # develop
-parser.add_argument('--num_class', type=int, default=5)
+parser.add_argument('--num_class', type=int, default=20)
 
 args = parser.parse_args()
 
