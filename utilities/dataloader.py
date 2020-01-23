@@ -48,9 +48,30 @@ class VOC(Dataset):
         
         if self.transform is not None:
             img, aug_target = self.transform([img, target])
+
+        crop = []
+
+        if aug_target is not None:
+            for box in aug_target:
+                x_start = max(box[1] * 448 - box[3] * 448 / 2, 0)
+                y_start = max(box[2] * 448 - box[4] * 448 / 2, 0)
+                x_end = min(x_start + box[3] * 448, 448)
+                y_end = min(y_start + box[4] * 448, 448)
+                area = (x_start, y_start, x_end, y_end)
+                cropped_img = img.crop(area)
+                cropped_img = cropped_img.resize((224, 224))
+                cropped_img = torchvision.transforms.ToTensor()(cropped_img)
+                crop.append(cropped_img)
+
+        if len(crop) is 0:
+            crop = None
+        else:
+            crop = torch.stack(crop)
+
+        if self.transform is not None:
             img = torchvision.transforms.ToTensor()(img)
-        
-        return img, aug_target, current_shape
+
+        return img, aug_target, current_shape, crop
 
     def _check_exists(self):
         print("Image Folder:{}".format(
@@ -110,13 +131,17 @@ def detection_collate(batch):
     imgs = []
     sizes = []
 
+    crop = []
+    crop_target = []
     for sample in batch:
+        crop.append(sample[3])
         imgs.append(sample[0])
         sizes.append(sample[2])
 
-        np_label = np.zeros((7,7,6), dtype=np.float32)
-
-        for object in sample[1]:
+        # bounding box : 3
+        np_label = np.zeros((49, 6), dtype=np.float32)
+        array_label = []
+        for idx, object in enumerate(sample[1]):
             objectness = 1
             classes = object[0]
             x_ratio = object[1]
@@ -130,9 +155,12 @@ def detection_collate(batch):
             x_offset = x_ratio / scale_factor - grid_x_index
             y_offset = y_ratio / scale_factor - grid_y_index
 
-            np_label[grid_x_index][grid_y_index] = np.array([objectness, x_offset, y_offset, w_ratio, h_ratio, classes])
+            # array_label.append([objectness, x_offset, y_offset, w_ratio, h_ratio, classes])
 
-        label = torch.from_numpy(np_label)
+            np_label[idx] = np.array([objectness, x_offset, y_offset, w_ratio, h_ratio, classes])
+            crop_target.append(torch.Tensor([classes]))
+
+        label = torch.Tensor(np_label)
         targets.append(label)
 
-    return torch.stack(imgs, 0), torch.stack(targets, 0), sizes
+    return torch.stack(imgs, 0), torch.stack(targets, 0), sizes, torch.cat(crop, 0), torch.stack(crop_target, 0)

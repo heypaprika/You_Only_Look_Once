@@ -11,6 +11,8 @@ import torchvision.transforms as transforms
 import models
 from models import detection_loss_4_yolo
 
+import proxyNS_eu
+
 from torchsummary.torchsummary import summary
 from utilities.dataloader import detection_collate, VOC
 
@@ -83,10 +85,12 @@ def train(args):
     
     
     # model
-    
-    model = models.YOLOv1(
-        num_class, dropout
-    )
+
+    model = models.End2End(num_class, dropout)
+
+    # model = models.YOLOv1(
+    #     num_class, dropout
+    # )
     
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -97,7 +101,9 @@ def train(args):
     
     if USE_SUMMARY :
         summary(model, (3, 448, 448))
-        
+
+    trclasses = range(20)
+    criterion = proxyNS_eu.ProxyNS(args.sz_embedding, trclasses, sigma=args.sigma).to(device)
     
     optimizer = torch.optim.Adam(
         model.parameters(), 
@@ -116,23 +122,25 @@ def train(args):
     for epoch in range(1, num_epochs + 1):
         if (epoch == 200) or (epoch == 400) or (epoch == 600) or (epoch == 20000) or (epoch == 30000):
             scheduler.step()
-        
-        for i, (images, labels, sizes) in enumerate(train_loader):
-            
+        # crop과 crop_target을 사용X
+        for i, (images, labels, sizes, crop, crop_target) in enumerate(train_loader):
+
             total_step += 1
             images = images.to(device)
             labels = labels.to(device)
             
-            pred = model(images)
+            output_vector, cropped_labels = model(images, labels)
             
-            loss, losses = detection_loss_4_yolo(pred, labels, l_coord, l_noobj, device)
-            
-            coord_loss = losses[0]
-            size_loss = losses[1]
-            objness_loss = losses[2]
-            noobjness_loss = losses[3]
-            class_loss = losses[4]
-            
+            # loss, losses = detection_loss_4_yolo(yolo_pred, labels, l_coord, l_noobj, device)
+            # loss /= 2
+            # coord_loss = losses[0] / 2
+            # size_loss = losses[1] / 2
+            # objness_loss = losses[2] / 2
+            # noobjness_loss = losses[3] / 2
+            # class_loss = losses[4]
+
+            loss = criterion(output_vector, cropped_labels)
+
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -140,10 +148,10 @@ def train(args):
             if total_step % 100 == 0:
                 print(
                     "epoch: [{}/{}], step:{}, lr:{}, total_loss:{:.4f}, \
-                    \ncoord:{:.4f}, size:{:.4f}, objness:{:.4f}, noobjness:{:.4f}, class:{:.4f}".format(
+                    \ncoord:{:.4f}, size:{:.4f}, objness:{:.4f}, noobjness:{:.4f}, cls:{:.4f}".format(
                         epoch, num_epochs, total_step, 
                         ([param['lr'] for param in optimizer.param_groups])[0],
-                        loss.item(), coord_loss, size_loss, objness_loss, noobjness_loss, class_loss
+                        loss.item(), coord_loss, size_loss, objness_loss, noobjness_loss, cls_loss
                     ))
             
             if epoch % 1000 == 0:

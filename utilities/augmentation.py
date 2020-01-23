@@ -35,7 +35,8 @@ def augmentImage(image, normed_lxywhs, image_width, image_height, seq):
                  )
 
     normed_bbs_aug = GetYoloStyleBBoxes(normed_lxywhs, bbs_aug, image_width, image_height)
-
+    if len(normed_bbs_aug) == 0:
+        return image, normed_lxywhs
     return image_aug, normed_bbs_aug
 
 
@@ -53,6 +54,6 @@ class Augmenter(object):
         image = np.array(image)  # PIL image to numpy array
 
         image_aug, normed_bbs_aug = augmentImage(image, normed_lxywhs, image_width, image_height, self.seq)
-
         image_aug = Image.fromarray(image_aug)  # numpy array to PIL image Again!
         return image_aug, normed_bbs_aug
+
