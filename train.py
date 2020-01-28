@@ -14,7 +14,7 @@ from models import detection_loss_4_yolo
 import proxyNS_eu
 
 from torchsummary.torchsummary import summary
-from utilities.dataloader import detection_collate, VOC
+from utilities.dataloader import detection_collate, Retrieval_V2_triplet
 
 from utilities.utils import save_checkpoint, create_vis_plot, update_vis_plot, visualize_GT
 from utilities.augmentation import Augmenter
@@ -70,7 +70,7 @@ def train(args):
         
     # DataLoader
     
-    train_dataset = VOC(
+    train_dataset = Loader(
         root = data_path, 
         transform = composed, 
         class_path = class_path
@@ -103,7 +103,10 @@ def train(args):
         summary(model, (3, 448, 448))
 
     trclasses = range(20)
-    criterion = proxyNS_eu.ProxyNS(args.sz_embedding, trclasses, sigma=args.sigma).to(device)
+#     criterion = proxyNS_eu.ProxyNS(args.sz_embedding, trclasses, sigma=args.sigma).to(device)
+
+    # !!! customizing is required
+    criterion = None
     
     optimizer = torch.optim.Adam(
         model.parameters(), 
@@ -123,13 +126,14 @@ def train(args):
         if (epoch == 200) or (epoch == 400) or (epoch == 600) or (epoch == 20000) or (epoch == 30000):
             scheduler.step()
         # crop과 crop_target을 사용X
-        for i, (images, labels, sizes, crop, crop_target) in enumerate(train_loader):
+        # dataset 만들 때, image와 pos_ref path, neg_ref path 필요.
+        for i, (images, pos_ref, neg_ref) in enumerate(train_loader):
 
             total_step += 1
             images = images.to(device)
             labels = labels.to(device)
             
-            output_vector, cropped_labels = model(images, labels)
+            output_vector = model(images)
             
             # loss, losses = detection_loss_4_yolo(yolo_pred, labels, l_coord, l_noobj, device)
             # loss /= 2
@@ -139,7 +143,7 @@ def train(args):
             # noobjness_loss = losses[3] / 2
             # class_loss = losses[4]
 
-            loss = criterion(output_vector, cropped_labels)
+            loss = criterion(output_vector, pos_ref, neg_ref)
 
             optimizer.zero_grad()
             loss.backward()

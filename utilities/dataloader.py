@@ -17,6 +17,41 @@ import matplotlib.pyplot as plt
 
 sys.path.insert(0, os.path.dirname(__file__))
 
+class Retrieval_V2_triplet(Dataset):
+    def __init__(self, data_path, desired_size=250)
+        self.label_list = []
+        self.imgpath_list = []
+        self.label_idx = 0
+
+        for root, dirs, files in os.walk(data_path):
+            if not files:
+                continue
+            for filename in files:
+                img_path = os.path.join(root, filename)
+                if img_path.split('.')[-1] in set(['jpg', 'JPG', 'png']):
+                    self.label_list.append(self.label_idx)
+                    self.imgpath_list.append(img_path)
+                else:
+                    print('image fault {}'.format(img_path))
+                    continue
+            self.label_idx += 1
+    
+        # Triplet
+        
+        self.q_list = []
+        self.pos_ref_list = []
+        self.neg_ref_list = []
+        
+        
+        
+    def __len__(self):
+        return len(self.label_list)
+    
+    def __getitem__(self, idx):
+        im = Image.open(self.imgpath_list[idx])
+        im = self.transform(im)
+        return im, pos_ref, neg_ref
+    
 class VOC(Dataset):
     IMAGE_FOLDER = "JPEGImages"
     LABEL_FOLDER = "Annotations"
