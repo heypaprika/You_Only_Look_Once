@@ -10,7 +10,7 @@ parser.add_argument('--mode', type=str, help='train test', default='train')
 
 # Data
 parser.add_argument('--dataset', type=str, default='voc')
-parser.add_argument('--data_path', type=str, default='/home/artint/다운로드/GitClone/You_Only_Look_Once/VOCdevkit/VOC2007')
+parser.add_argument('--data_path', type=str, default='/home/artint/다운로드/GitClone/You_Only_Look_Once/phase1_dataset_v2/train')
 parser.add_argument('--class_path', type=str, default='./names/voc.names')
 parser.add_argument('--checkpoint_path', type=str, default='./')
 
