@@ -70,10 +70,10 @@ def train(args):
         
     # DataLoader
     
-    train_dataset = Loader(
-        root = data_path, 
-        transform = composed, 
-        class_path = class_path
+    train_dataset = Retrieval_V2_triplet(
+        data_path = data_path,
+        transform = composed,
+        desired_size=448
     )
     
     train_loader = torch.utils.data.DataLoader(
@@ -132,6 +132,8 @@ def train(args):
 
             total_step += 1
             images = images.to(device)
+
+
             labels = labels.to(device)
             
             output_vector = model(images)

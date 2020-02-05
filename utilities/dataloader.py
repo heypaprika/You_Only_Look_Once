@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, os.path.dirname(__file__))
 
 class Retrieval_V2_triplet(Dataset):
-    def __init__(self, data_path, desired_size=250)
+    def __init__(self, data_path, transform, desired_size=250):
         self.label_list = []
         self.imgpath_list = []
         self.label_idx = 0
@@ -43,7 +43,10 @@ class Retrieval_V2_triplet(Dataset):
         self.neg_ref_list = []
         
         # ToDo 1: make Triplet lists
-        
+        for path in self.imgpath_list:
+            # print(path)
+            print(path.split("/")[-2])
+
     def __len__(self):
         return len(self.label_list)
     
@@ -53,7 +56,8 @@ class Retrieval_V2_triplet(Dataset):
 
         im = Image.open(self.imgpath_list[idx])
         im = self.transform(im)
-        return im, pos_ref, neg_ref
+        return im
+        # , pos_ref, neg_ref
     
 class VOC(Dataset):
     IMAGE_FOLDER = "JPEGImages"
