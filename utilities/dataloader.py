@@ -1,5 +1,7 @@
 import sys
 import os
+from itertools import combinations
+from random import choice
 
 import torch
 from torch.utils.data import Dataset
@@ -37,15 +39,35 @@ class Retrieval_V2_triplet(Dataset):
             self.label_idx += 1
     
         # Triplet
-        
+        # ToDo 1: make Triplet lists
+
         self.q_list = []
         self.pos_ref_list = []
         self.neg_ref_list = []
-        
-        # ToDo 1: make Triplet lists
+
+        data_list = [[] for _ in range(1000)]
+        data_set = set()
+
+
         for path in self.imgpath_list:
-            # print(path)
-            print(path.split("/")[-2])
+            data_list[int(path.split("/")[-2])].append(path)
+            data_set.add(path.split("/")[-2])
+
+        classnum_list = list(data_set)
+        comb_list = []
+        third_path = []
+
+        for classnum, data in enumerate(data_list):
+            if len(data) == 0: continue
+            comb = list(combinations(data, 2))
+            comb_list += comb
+            for _ in range(len(comb)):
+                other_class = choice([int(i) for i in classnum_list if int(i) not in [classnum]])
+                if int(other_class) == classnum:print("error"); return
+                third_path.append(choice(data_list[other_class]))
+
+        self.q_list, self.pos_ref_list = list(map(list, zip(*comb_list)))
+        self.neg_ref_list = third_path
 
     def __len__(self):
         return len(self.label_list)
