@@ -42,12 +42,15 @@ class Retrieval_V2_triplet(Dataset):
         self.pos_ref_list = []
         self.neg_ref_list = []
         
-        
+        # ToDo 1: make Triplet lists
         
     def __len__(self):
         return len(self.label_list)
     
     def __getitem__(self, idx):
+
+        # ToDo 1-1: path to img
+
         im = Image.open(self.imgpath_list[idx])
         im = self.transform(im)
         return im, pos_ref, neg_ref

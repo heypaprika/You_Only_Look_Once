@@ -105,7 +105,8 @@ def train(args):
     trclasses = range(20)
 #     criterion = proxyNS_eu.ProxyNS(args.sz_embedding, trclasses, sigma=args.sigma).to(device)
 
-    # !!! customizing is required
+
+    # Todo 3 : Make loss functioin
     criterion = None
     
     optimizer = torch.optim.Adam(
@@ -134,7 +135,12 @@ def train(args):
             labels = labels.to(device)
             
             output_vector = model(images)
-            
+
+            # Todo 2: output vector of pos_ref & neg ref
+            pos_ref_vector = None
+            neg_ref_vector = None
+
+
             # loss, losses = detection_loss_4_yolo(yolo_pred, labels, l_coord, l_noobj, device)
             # loss /= 2
             # coord_loss = losses[0] / 2
@@ -143,7 +149,7 @@ def train(args):
             # noobjness_loss = losses[3] / 2
             # class_loss = losses[4]
 
-            loss = criterion(output_vector, pos_ref, neg_ref)
+            loss = criterion(output_vector, pos_ref_vector, neg_ref_vector)
 
             optimizer.zero_grad()
             loss.backward()
