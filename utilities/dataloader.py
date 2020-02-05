@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, os.path.dirname(__file__))
 
 class Retrieval_V2_triplet(Dataset):
-    def __init__(self, data_path, desired_size=250)
+    def __init__(self, data_path, desired_size=250):
         self.label_list = []
         self.imgpath_list = []
         self.label_idx = 0
