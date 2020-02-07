@@ -11,11 +11,15 @@ import torchvision.transforms as transforms
 import models
 from models import detection_loss_4_yolo
 
-import proxyNS_eu
 import net
 
+import proxyNS_eu
+
+import dist_loss
+
+
 from torchsummary.torchsummary import summary
-from utilities.dataloader import detection_collate, Retrieval_V2_triplet
+from utilities.dataloader import retrieval_collate, Retrieval_V2_triplet
 
 from utilities.utils import save_checkpoint, create_vis_plot, update_vis_plot, visualize_GT
 from utilities.augmentation import Augmenter
@@ -81,7 +85,7 @@ def train(args):
         dataset = train_dataset,
         batch_size = batch_size,
         shuffle = True,
-        collate_fn = detection_collate
+        collate_fn = retrieval_collate
     )
     
     
@@ -107,8 +111,8 @@ def train(args):
 #     criterion = proxyNS_eu.ProxyNS(args.sz_embedding, trclasses, sigma=args.sigma).to(device)
 
 
-    # Todo 3 : Make loss functioin
-    criterion = None
+    # Todo 3 : Make loss function
+    criterion = dist_loss.D_loss()
     
     optimizer = torch.optim.Adam(
         model.parameters(), 
@@ -132,17 +136,12 @@ def train(args):
         for i, (images, pos_ref, neg_ref) in enumerate(train_loader):
 
             total_step += 1
+
             images = images.to(device)
-            labels = labels.to(device)
-            
-            output_vector = model(images)
+            pos_ref = pos_ref.to(device)
+            neg_ref = neg_ref.to(device)
 
-            # Todo 2: output vector of pos_ref & neg ref
-            pos_ref_vector = None
-            neg_ref_vector = None
-            dense = net.Densenet121
-            yhat = dense.predict
-
+            output_vector = model(images, pos_ref, neg_ref)
 
             # loss, losses = detection_loss_4_yolo(yolo_pred, labels, l_coord, l_noobj, device)
             # loss /= 2
@@ -152,7 +151,7 @@ def train(args):
             # noobjness_loss = losses[3] / 2
             # class_loss = losses[4]
 
-            loss = criterion(output_vector, pos_ref_vector, neg_ref_vector)
+            loss = criterion(*output_vector)
 
             optimizer.zero_grad()
             loss.backward()
