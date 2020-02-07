@@ -19,7 +19,7 @@ parser.add_argument('--input_height', type=int, default=448)
 parser.add_argument('--input_width', type=int, default=448)
 
 # Train / Test
-parser.add_argument('--batch_size', type=int, default=3)
+parser.add_argument('--batch_size', type=int, default=10)
 parser.add_argument('--num_epochs', type=int, default=20)
 parser.add_argument('--lr', type=float, default=1e-4)
 parser.add_argument('--weight_decay', type=float, default=1e-5)

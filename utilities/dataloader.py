@@ -76,10 +76,14 @@ class Retrieval_V2_triplet(Dataset):
 
         # ToDo 1-1: path to img
 
-        im = Image.open(self.imgpath_list[idx])
-        im = self.transform(im)
-        return im
-        # , pos_ref, neg_ref
+        anchor_im = Image.open(self.q_list[idx])
+        # anchor_im = self.transform(anchor_im)
+        anchor_im = torchvision.transforms.ToTensor()(anchor_im)
+        pos_im = Image.open(self.pos_ref_list[idx])
+        pos_im = torchvision.transforms.ToTensor()(pos_im)
+        neg_im = Image.open(self.neg_ref_list[idx])
+        neg_im = torchvision.transforms.ToTensor()(neg_im)
+        return anchor_im, pos_im, neg_im
     
 class VOC(Dataset):
     IMAGE_FOLDER = "JPEGImages"
@@ -189,6 +193,18 @@ class VOC(Dataset):
                 return result
         except Exception as e:
             raise RuntimeError("Error : {}".format(e))
+
+def retrieval_collate(batch):
+    anchor = []
+    pos = []
+    neg = []
+
+    for sample in batch:
+        anchor.append(sample[0])
+        pos.append(sample[1])
+        neg.append(sample[2])
+
+    return torch.stack(anchor, 0), torch.stack(pos, 0), torch.stack(neg, 0)
 
 def detection_collate(batch):
     targets = []

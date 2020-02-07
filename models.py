@@ -24,7 +24,7 @@ class End2End(nn.Module):
         net.embed(self.retrieval, sz_embedding=None)
 
     def forward(self, images):
-        resized_images = self.yolo(images)
+        resized_images = self.yolo(images, img_size=224)
         output = self.retrieval(resized_images)
         return output
 
@@ -111,7 +111,7 @@ class YOLOv1(nn.Module):
         )
         
         self.fc1 = nn.Sequential(
-            nn.Linear(7 * 7 * 1024, 4096),
+            nn.Linear(3 * 3 * 1024, 4096),
             nn.LeakyReLU(),
             nn.Dropout(self.dropout)
         )
@@ -157,7 +157,7 @@ class YOLOv1(nn.Module):
             self.fc3
         )
 
-    def forward(self, x, y, img_size=250):
+    def forward(self, x, img_size=250):
         out = self.feature(x)
         out = out.reshape(out.size(0), -1)
         out = self.FC(out)
@@ -166,13 +166,15 @@ class YOLOv1(nn.Module):
         # A = np.delete(A, np.where(~A.any(axis=0))[0], axis=1)
 
         resized = []
-        
+
+        ########## Todo : 이미지 부분에서 에러 발생.
+
         for ind, box in enumerate(out):
             img = torchvision.transforms.ToPILImage(mode='RGB')(x[ind].cpu())
-            x_start = max(box[0] * img_size - box[2] * img_size / 2, 0)
-            y_start = max(box[1] * img_size - box[3] * img_size / 2, 0)
-            x_end = min(x_start + box[2] * img_size, img_size)
-            y_end = min(y_start + box[3] * img_size, img_size)
+            x_start = max(box[0].item() * img_size - box[2].item() * img_size / 2, 0)
+            y_start = max(box[1].item() * img_size - box[3].item() * img_size / 2, 0)
+            x_end = min(x_start + box[2].item() * img_size, img_size)
+            y_end = min(y_start + box[3].item() * img_size, img_size)
 
 #             if x_start > x_end or y_start > y_end:
 #                 area = (x_start, x_start)

@@ -12,9 +12,10 @@ import models
 from models import detection_loss_4_yolo
 
 import proxyNS_eu
+import dist_loss
 
 from torchsummary.torchsummary import summary
-from utilities.dataloader import detection_collate, Retrieval_V2_triplet
+from utilities.dataloader import retrieval_collate, Retrieval_V2_triplet
 
 from utilities.utils import save_checkpoint, create_vis_plot, update_vis_plot, visualize_GT
 from utilities.augmentation import Augmenter
@@ -80,7 +81,7 @@ def train(args):
         dataset = train_dataset,
         batch_size = batch_size,
         shuffle = True,
-        collate_fn = detection_collate
+        collate_fn = retrieval_collate
     )
     
     
@@ -107,7 +108,7 @@ def train(args):
 
 
     # Todo 3 : Make loss functioin
-    criterion = None
+    criterion = dist_loss.D_loss()
     
     optimizer = torch.optim.Adam(
         model.parameters(), 
@@ -132,9 +133,8 @@ def train(args):
 
             total_step += 1
             images = images.to(device)
-
-
-            labels = labels.to(device)
+            pos_ref = pos_ref.to(device)
+            neg_ref = neg_ref.to(device)
             
             output_vector = model(images)
 
