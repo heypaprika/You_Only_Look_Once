@@ -12,6 +12,7 @@ import models
 from models import detection_loss_4_yolo
 
 import proxyNS_eu
+import net
 
 from torchsummary.torchsummary import summary
 from utilities.dataloader import detection_collate, Retrieval_V2_triplet
@@ -132,8 +133,6 @@ def train(args):
 
             total_step += 1
             images = images.to(device)
-
-
             labels = labels.to(device)
             
             output_vector = model(images)
@@ -141,6 +140,8 @@ def train(args):
             # Todo 2: output vector of pos_ref & neg ref
             pos_ref_vector = None
             neg_ref_vector = None
+            dense = net.Densenet121
+            yhat = dense.predict
 
 
             # loss, losses = detection_loss_4_yolo(yolo_pred, labels, l_coord, l_noobj, device)
